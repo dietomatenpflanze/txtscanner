@@ -22,77 +22,62 @@ startStopBtn.addEventListener('click', () => {
 // Function to start text detection
 function startTextDetection() {
     // Check camera access
-    checkCameraAccess()
-        .then(() => {
+    navigator.mediaDevices.getUserMedia({ video: true })
+        .then(stream => {
+            video.srcObject = stream;
+            video.play();
+            feedbackText.textContent = 'Text detection started...';
             isDetecting = true;
             startStopBtn.textContent = 'Stop';
-            feedbackText.textContent = 'Text detection started...';
-            feedbackText.style.color = 'green';
-            captureVideoFrame();
+            tesseractWorker = Tesseract.createWorker();
+            tesseractWorker.load();
+            tesseractWorker.recognize(video)
+                .then(result => {
+                    updateResult(result);
+                })
+                .finally(() => {
+                    stopTextDetection();
+                });
         })
-        .catch((error) => {
-            console.error(error);
-            feedbackText.textContent = 'Failed to access camera. Please check camera permissions.';
-            feedbackText.style.color = 'red';
+        .catch(error => {
+            console.error('Error accessing camera:', error);
+            feedbackText.textContent = 'Error accessing camera. Please check camera permissions.';
         });
 }
 
 // Function to stop text detection
 function stopTextDetection() {
-    isDetecting = false;
-    startStopBtn.textContent = 'Start';
-    feedbackText.textContent = 'Text detection stopped.';
-    feedbackText.style.color = 'black';
-    if (tesseractWorker) {
-        tesseractWorker.terminate();
-        tesseractWorker = null;
-    }
-}
-
-// Function to capture video frame and process for text detection
-function captureVideoFrame() {
-    if (!isDetecting) {
-        return;
-    }
-
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const result = Tesseract.recognize(imageData, {
-        lang: 'eng',
-        tessedit_char_whitelist: '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz.,!?@#$%&*()-+=/:;"\''
-    });
-
-    processedImage.src = canvas.toDataURL();
-    rawResult.textContent = result.text;
-    tableResult.innerHTML = getTableHTML(result.words);
-
-    requestAnimationFrame(captureVideoFrame);
-}
-
-// Function to get HTML for table-like result
-function getTableHTML(words) {
-    let tableHTML = '<tr><th>Text</th><th>Confidence</th></tr>';
-    words.forEach(word => {
-        if (word.confidence > 60) {
-            tableHTML += `<tr><td>${word.text}</td><td>${word.confidence}</td></tr>`;
+    if (isDetecting) {
+        video.srcObject.getTracks()[0].stop();
+        video.srcObject = null;
+        feedbackText.textContent = '';
+        isDetecting = false;
+        startStopBtn.textContent = 'Start';
+        if (tesseractWorker) {
+            tesseractWorker.terminate();
+            tesseractWorker = null;
         }
-    });
-    return tableHTML;
+    }
 }
 
-// Function to check camera access
-function checkCameraAccess() {
-    return new Promise((resolve, reject) => {
-        navigator.mediaDevices.getUserMedia({ video: true })
-            .then((stream) => {
-                video.srcObject = stream;
-                video.onloadedmetadata = () => {
-                    video.play();
-                    resolve();
-                };
-            })
-            .catch((error) => {
-                reject(error);
-            });
-    });
+// Function to update result
+function updateResult(result) {
+    if (result) {
+        // Update processed image
+        processedImage.src = result.dataUrl;
+
+        // Update raw result
+        rawResult.textContent = result.text;
+
+        // Update table-like result
+        const lines = result.text.split('\n');
+        let tableHTML = '';
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i].trim();
+            if (line.length > 0) {
+                tableHTML += `<tr><td>${line}</td></tr>`;
+            }
+        }
+        tableResult.innerHTML = tableHTML;
+    }
 }
