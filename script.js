@@ -7,6 +7,7 @@ const rawResult = document.getElementById('raw-result');
 const tableResult = document.getElementById('table-result');
 const feedbackText = document.getElementById('feedback-text');
 const startStopBtn = document.getElementById('start-stop-btn');
+const loadingProgress = document.getElementById('loading-progress');
 let isDetecting = false;
 let tesseractWorker = null;
 
@@ -15,38 +16,43 @@ startStopBtn.addEventListener('click', () => {
     if (isDetecting) {
         stopTextDetection();
     } else {
-        requestCameraAccess();
+        startTextDetection();
     }
 });
 
-// Function to request camera access
-function requestCameraAccess() {
-    feedbackText.textContent = 'Waiting for camera permission...';
-    navigator.mediaDevices.getUserMedia({ video: true })
-        .then(stream => {
-            feedbackText.textContent = 'Camera access granted. Starting text detection...';
-            video.srcObject = stream;
-            video.play();
-            isDetecting = true;
-            startStopBtn.textContent = 'Stop';
-            tesseractWorker = Tesseract.createWorker();
-            tesseractWorker.load();
-            tesseractWorker.recognize(video)
-                .then(result => {
-                    updateResult(result);
-                })
-                .finally(() => {
-                    requestCameraAccess();
-                });
-        })
-        .catch(error => {
-            console.error('Error accessing camera:', error);
-            feedbackText.textContent = 'Error accessing camera. Please check camera permissions and try again.';
-        setTimeout(() => {
-            feedbackText.textContent = 'Retry.';
-                startTextDetection();
-            }, 3000); // Retry after 3 seconds
+// Function to start text detection
+async function startTextDetection() {
+    try {
+        // Check camera access
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        video.srcObject = stream;
+        video.play();
+
+        feedbackText.textContent = 'Waiting for permission to access Tesseract library...';
+        loadingProgress.style.display = 'block';
+
+        // Load Tesseract library and initialize worker
+        tesseractWorker = Tesseract.createWorker({
+            logger: progress => {
+                loadingProgress.value = progress.progress;
+            }
         });
+        await tesseractWorker.load();
+        await tesseractWorker.initialize('eng');
+
+        feedbackText.textContent = 'Text detection started...';
+        isDetecting = true;
+        startStopBtn.textContent = 'Stop';
+
+        // Start text detection loop
+        while (isDetecting) {
+            const result = await tesseractWorker.recognize(video);
+            updateResult(result);
+        }
+    } catch (error) {
+        console.error('Error accessing camera:', error);
+        feedbackText.textContent = 'Error accessing camera. Please check camera permissions.';
+    }
 }
 
 // Function to stop text detection
