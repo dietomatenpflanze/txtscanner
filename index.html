@@ -1,115 +1,30 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Text Scanner</title>
-    <style>
-        video {
-            border: 1px solid #000;
-        }
-        #loader {
-            display: none;
-        }
-        #error {
-            display: none;
-            color: red;
-        }
-    </style>
-    <link rel="manifest" href="/manifest.json">
+    <title>Text Detection App</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Text Scanner</h1>
-    <video id="video" width="640" height="480" autoplay muted></video>
-    <canvas id="canvas" width="640" height="480"></canvas>
-    <h2>Detected Numbers:</h2>
-    <ul id="numbersList"></ul>
-    <div id="loader">Scanning...</div>
-    <div id="error"></div>
-    <script src="https://tesseract.projectnaptha.com/1.0.0/tesseract.min.js"></script>
-    <script>
-        // Register service worker
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/service-worker.js')
-                .then(registration => {
-                    console.log('Service Worker registered with scope:', registration.scope);
-                })
-                .catch(error => {
-                    console.error('Service Worker registration failed:', error);
-                });
-        }
-
-        const video = document.getElementById('video');
-        const canvas = document.getElementById('canvas');
-        const numbersList = document.getElementById('numbersList');
-        const loader = document.getElementById('loader');
-        const error = document.getElementById('error');
-        const ctx = canvas.getContext('2d');
-
-        // Check for camera support
-        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-            // Access the camera and start video stream
-            navigator.mediaDevices.getUserMedia({ video: true })
-                .then(stream => {
-                    video.srcObject = stream;
-                    video.onloadedmetadata = () => {
-                        video.play();
-                        scanText();
-                    };
-                })
-                .catch(error => {
-                    console.error('Unable to access the camera.', error);
-                    showError('Failed to access the camera. Please check your camera settings and try again.');
-                });
-        } else {
-            console.error('Camera not supported.');
-            showError('Camera not supported.');
-        }
-
-        // Scan text from camera video
-        function scanText() {
-            loader.style.display = 'block';
-            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            Tesseract.recognize(imageData)
-                .then(result => {
-                    const detectedText = result.data.text;
-                    const numbers = extractNumbers(detectedText);
-                    displayNumbers(numbers);
-                    loader.style.display = 'none';
-                    requestAnimationFrame(scanText); // Continuously scan text using requestAnimationFrame for better performance
-                })
-                .catch(error => {
-                    console.error('Failed to recognize text.', error);
-                    showError('Failed to recognize text. Please try again.');
-                    loader.style.display = 'none';
-                });
-        }
-
-        // Extract numbers from detected text
-        function extractNumbers(text) {
-            const regex = /\b\d+\b/g; // Regular expression to match numbers
-            const matches = text.match(regex);
-            return matches ? matches.map(Number) : [];
-        }
-        
-        // Display detected numbers in a list
-        function displayNumbers(numbers) {
-            numbersList.innerHTML = '';
-            if (numbers.length === 0) {
-                numbersList.innerHTML = '<li>No numbers detected</li>';
-            } else {
-                numbers.forEach(number => {
-                    const li = document.createElement('li');
-                    li.textContent = number;
-                    numbersList.appendChild(li);
-                });
-            }
-        }
-
-        // Show error message
-        function showError(message) {
-            error.textContent = message;
-            error.style.display = 'block';
-        }
-    </script>
+    <h1>Text Detection App</h1>
+    <div id="app-container">
+        <div id="video-container">
+            <video id="video" autoplay></video>
+            <canvas id="canvas"></canvas>
+        </div>
+        <div id="result-container">
+            <h2>Processed Image</h2>
+            <img id="processed-image" src="" alt="Processed Image">
+            <h2>Raw Result</h2>
+            <pre id="raw-result"></pre>
+            <h2>Table-like Result</h2>
+            <table id="table-result"></table>
+        </div>
+        <div id="feedback-container">
+            <p id="feedback-text"></p>
+        </div>
+        <button id="start-stop-btn">Start</button>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
