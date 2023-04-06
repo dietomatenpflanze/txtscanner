@@ -15,18 +15,18 @@ startStopBtn.addEventListener('click', () => {
     if (isDetecting) {
         stopTextDetection();
     } else {
-        startTextDetection();
+        requestCameraAccess();
     }
 });
 
-// Function to start text detection
-function startTextDetection() {
-    // Check camera access
+// Function to request camera access
+function requestCameraAccess() {
+    feedbackText.textContent = 'Waiting for camera permission...';
     navigator.mediaDevices.getUserMedia({ video: true })
         .then(stream => {
+            feedbackText.textContent = 'Camera access granted. Starting text detection...';
             video.srcObject = stream;
             video.play();
-            feedbackText.textContent = 'Text detection started...';
             isDetecting = true;
             startStopBtn.textContent = 'Stop';
             tesseractWorker = Tesseract.createWorker();
@@ -41,11 +41,7 @@ function startTextDetection() {
         })
         .catch(error => {
             console.error('Error accessing camera:', error);
-            feedbackText.textContent = 'Error accessing camera. Please check camera permissions.';
-        // Retry text detection after a delay if camera access is resolved
-            setTimeout(() => {
-                startTextDetection();
-            }, 3000); // Retry after 3 seconds
+            feedbackText.textContent = 'Error accessing camera. Please check camera permissions and try again.';
         });
 }
 
@@ -83,7 +79,7 @@ function updateResult(result) {
             }
         }
         tableResult.innerHTML = tableHTML;
-        
+
         // Show feedback to user when text is detected
         if (result.text.length > 0) {
             feedbackText.textContent = 'Text detected!';
