@@ -1,23 +1,35 @@
-body {
-  font-family: Arial, sans-serif;
-  text-align: center;
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
 }
 
-#cameraOutput {
-  width: 100%;
-  height: 400px;
-  background-color: #eee;
-  margin-bottom: 10px;
+.camera-container {
+    position: relative;
+    width: 100%;
+    height: 0;
+    padding-bottom: 75%;
+    margin-bottom: 20px;
+    overflow: hidden;
 }
 
-#result {
-  margin-bottom: 10px;
+#cameraInput,
+#canvasOutput {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
 }
 
-#feedback {
-  margin-bottom: 10px;
+.result-container {
+    margin-top: 10px;
 }
 
-#startStopBtn {
-  padding: 10px;
+.feedback-container {
+    margin-bottom: 10px;
+}
+
+.control-button {
+    margin-right: 10px;
 }
