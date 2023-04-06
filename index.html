@@ -1,31 +1,18 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8">
-    <title>Text Detection</title>
-      <link rel="stylesheet" href="style.css">
-    <style>
-      #canvas {
-        display: none;
-      }
-    </style>
-  </head>
-  <body>
-    <h1>Text Detection</h1>
-    <video id="video"></video>
-    <canvas id="canvas"></canvas>   
-    <div id="loading-progress"></div>
-    <img id="processed-image" width="640" height="480">
-    <div id="feedback-text"></div>
-    <button id="start-stop-btn">Start</button>
-    <div id="result-container">
-      <h2>Raw Result:</h2>
-      <pre id="raw-result"></pre>
-      <h2>Table Result:</h2>
-      <table id="table-result"></table>
-    </div>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.11.0"></script>
-    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@2.2.2/dist/tesseract.min.js"></script>
-    <script src="script.js"></script>
-  </body>
+<head>
+  <title>OCR Web App</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>OCR Web App</h1>
+  <div id="cameraOutput"></div>
+  <div id="result"></div>
+  <div id="feedback"></div>
+  <button id="startStopBtn">Start</button>
+
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js"></script>
+  <script src="worker.js"></script>
+  <script src="app.js"></script>
+</body>
 </html>
