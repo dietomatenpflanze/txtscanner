@@ -57,7 +57,8 @@ h1 {
     border-collapse: collapse;
 }
 
-#table-result td, #table-result th {
+#table-result td,
+#table-result th {
     padding: 5px;
     border: 1px solid #000;
 }
