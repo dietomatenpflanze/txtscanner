@@ -42,6 +42,10 @@ function requestCameraAccess() {
         .catch(error => {
             console.error('Error accessing camera:', error);
             feedbackText.textContent = 'Error accessing camera. Please check camera permissions and try again.';
+        setTimeout(() => {
+            feedbackText.textContent = 'Retry.';
+                startTextDetection();
+            }, 3000); // Retry after 3 seconds
         });
 }
 
