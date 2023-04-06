@@ -1,100 +1,100 @@
-// Variables
-const video = document.getElementById('video');
-const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');
-const processedImage = document.getElementById('processed-image');
-const rawResult = document.getElementById('raw-result');
-const tableResult = document.getElementById('table-result');
-const feedbackText = document.getElementById('feedback-text');
-const startStopBtn = document.getElementById('start-stop-btn');
-const loadingProgress = document.getElementById('loading-progress');
-let isDetecting = false;
-let tesseractWorker = null;
+// Check camera permission
+if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+  navigator.mediaDevices.getUserMedia({ video: true })
+    .then(function (stream) {
+      // Check camera compatibility
+      var video = document.createElement('video');
+      video.srcObject = stream;
+      video.onloadedmetadata = function () {
+        video.play();
+        // Load Tesseract.js
+        Tesseract.initialize({ workerPath: 'https://cdn.jsdelivr.net/npm/tesseract.js@2.2.2/dist/worker.js' })
+          .then(function () {
+            // Provide feedback
+            showFeedback('Tesseract.js loaded successfully.');
+            // Enable start/stop button
+            var startStopBtn = document.getElementById('startStopBtn');
+            startStopBtn.disabled = false;
+            startStopBtn.addEventListener('click', toggleTextDetection);
+          })
+          .catch(function (err) {
+            // Show error feedback
+            showFeedback('Failed to load Tesseract.js: ' + err);
+          });
+      };
+    })
+    .catch(function (err) {
+      // Show error feedback
+      showFeedback('Failed to access camera: ' + err);
+    });
+} else {
+  // Show error feedback
+  showFeedback('Camera not supported in this browser.');
+}
 
-// Event listener for start/stop button
-startStopBtn.addEventListener('click', () => {
-    if (isDetecting) {
-        stopTextDetection();
-    } else {
-        startTextDetection();
-    }
-});
+var isTextDetectionRunning = false;
+
+// Function to start/stop text detection
+function toggleTextDetection() {
+  var startStopBtn = document.getElementById('startStopBtn');
+  var resultElem = document.getElementById('result');
+
+  if (!isTextDetectionRunning) {
+    // Start text detection
+    startStopBtn.textContent = 'Stop';
+    isTextDetectionRunning = true;
+    showFeedback('Text detection started.');
+    startTextDetection(resultElem);
+  } else {
+    // Stop text detection
+    startStopBtn.textContent = 'Start';
+    isTextDetectionRunning = false;
+    showFeedback('Text detection stopped.');
+  }
+}
 
 // Function to start text detection
-async function startTextDetection() {
-    try {
-        // Check camera access
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        video.srcObject = stream;
-        video.play();
+function startTextDetection(resultElem) {
+  var cameraOutput = document.getElementById('cameraOutput');
+  var feedbackElem = document.getElementById('feedback');
 
-        feedbackText.textContent = 'Waiting for permission to access Tesseract library...';
-        loadingProgress.style.display = 'block';
+  // Capture camera frame and send to worker
+  var canvas = document.createElement('canvas');
+  var context = canvas.getContext('2d');
+  var worker = new Worker('worker.js');
 
-        // Load Tesseract library and initialize worker
-        tesseractWorker = Tesseract.createWorker({
-            logger: progress => {
-                loadingProgress.value = progress.progress;
-            }
-        });
-        await tesseractWorker.load();
-        await tesseractWorker.initialize('eng');
-
-        feedbackText.textContent = 'Text detection started...';
-        isDetecting = true;
-        startStopBtn.textContent = 'Stop';
-
-        // Start text detection loop
-        while (isDetecting) {
-            const result = await tesseractWorker.recognize(video);
-            updateResult(result);
-        }
-    } catch (error) {
-        console.error('Error accessing camera:', error);
-        feedbackText.textContent = 'Error accessing camera. Please check camera permissions.';
+  function captureCameraFrame() {
+    if (!isTextDetectionRunning) {
+      return;
     }
+
+    context.drawImage(cameraOutput, 0, 0, canvas.width, canvas.height);
+    var imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+    worker.postMessage({ imageData: imageData });
+    requestAnimationFrame(captureCameraFrame);
+  }
+
+  // Start capturing camera frame and processing with Tesseract.js
+  captureCameraFrame();
+
+  // Listen for worker message
+  worker.addEventListener('message', function (event) {
+    if (!isTextDetectionRunning) {
+      return;
+    }
+
+    if (event.data && event.data.text) {
+      // Update result element with detected text
+      resultElem.textContent = 'Detected Text: ' + event.data.text;
+    }
+  });
+
+  // Provide feedback
+  showFeedback('Text detection running...');
 }
 
-// Function to stop text detection
-function stopTextDetection() {
-    if (isDetecting) {
-        video.srcObject.getTracks()[0].stop();
-        video.srcObject = null;
-        feedbackText.textContent = '';
-        isDetecting = false;
-        startStopBtn.textContent = 'Start';
-        if (tesseractWorker) {
-            tesseractWorker.terminate();
-            tesseractWorker = null;
-        }
-    }
-}
-
-// Function to update result
-function updateResult(result) {
-    if (result) {
-        // Update processed image
-        processedImage.src = result.dataUrl;
-
-        // Update raw result
-        rawResult.textContent = result.text;
-
-        // Update table-like result
-        const lines = result.text.split('\n');
-        let tableHTML = '';
-        for (let i = 0; i < lines.length; i++) {
-            const line = lines[i].trim();
-            if (line.length > 0) {
-                tableHTML += `<tr><td>${line}</td></tr>`;
-            }
-        }
-        tableResult.innerHTML = tableHTML;
-
-        // Show feedback to user when text is detected
-        if (result.text.length > 0) {
-            feedbackText.textContent = 'Text detected!';
-        } else {
-            feedbackText.textContent = '';
-        }
-    }
+// Function to show feedback
+function showFeedback(message) {
+  var feedbackElem = document.getElementById('feedback');
+  feedbackElem.textContent = message;
 }
