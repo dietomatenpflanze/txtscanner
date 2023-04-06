@@ -83,5 +83,12 @@ function updateResult(result) {
             }
         }
         tableResult.innerHTML = tableHTML;
+        
+        // Show feedback to user when text is detected
+        if (result.text.length > 0) {
+            feedbackText.textContent = 'Text detected!';
+        } else {
+            feedbackText.textContent = '';
+        }
     }
 }
