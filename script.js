@@ -36,7 +36,7 @@ function requestCameraAccess() {
                     updateResult(result);
                 })
                 .finally(() => {
-                    stopTextDetection();
+                    requestCameraAccess();
                 });
         })
         .catch(error => {
