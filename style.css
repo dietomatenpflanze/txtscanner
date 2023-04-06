@@ -1,81 +1,23 @@
 body {
-    margin: 0;
-    padding: 0;
-    font-family: Arial, sans-serif;
+  font-family: Arial, sans-serif;
+  text-align: center;
 }
 
-h1 {
-    text-align: center;
-    margin-top: 30px;
+#cameraOutput {
+  width: 100%;
+  height: 400px;
+  background-color: #eee;
+  margin-bottom: 10px;
 }
 
-#app-container {
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+#result {
+  margin-bottom: 10px;
 }
 
-#video-container {
-    position: relative;
-    width: 100%;
-    height: 0;
-    padding-bottom: 75%;
-    margin-bottom: 20px;
-    overflow: hidden;
+#feedback {
+  margin-bottom: 10px;
 }
 
-#video {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-#canvas {
-    display: none;
-}
-
-#result-container {
-    width: 100%;
-    margin-bottom: 20px;
-}
-
-#processed-image {
-    max-width: 100%;
-    height: auto;
-}
-
-#raw-result {
-    white-space: pre-wrap;
-}
-
-#table-result {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-#table-result td,
-#table-result th {
-    padding: 5px;
-    border: 1px solid #000;
-}
-
-#feedback-container {
-    width: 100%;
-    margin-bottom: 20px;
-}
-
-#feedback-text {
-    text-align: center;
-    font-weight: bold;
-}
-
-#start-stop-btn {
-    max-width: 200px;
-    margin: 0 auto;
-    padding: 10px;
-    font-size: 18px;
+#startStopBtn {
+  padding: 10px;
 }
