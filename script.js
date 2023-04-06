@@ -42,6 +42,10 @@ function startTextDetection() {
         .catch(error => {
             console.error('Error accessing camera:', error);
             feedbackText.textContent = 'Error accessing camera. Please check camera permissions.';
+        // Retry text detection after a delay if camera access is resolved
+            setTimeout(() => {
+                startTextDetection();
+            }, 3000); // Retry after 3 seconds
         });
 }
 
