@@ -6,49 +6,81 @@
         video {
             border: 1px solid #000;
         }
+        #loader {
+            display: none;
+        }
+        #error {
+            display: none;
+            color: red;
+        }
     </style>
+    <link rel="manifest" href="/manifest.json">
 </head>
 <body>
     <h1>Text Scanner</h1>
-    <video id="video" width="640" height="480" autoplay></video>
+    <video id="video" width="640" height="480" autoplay muted></video>
     <canvas id="canvas" width="640" height="480"></canvas>
     <h2>Detected Numbers:</h2>
     <ul id="numbersList"></ul>
+    <div id="loader">Scanning...</div>
+    <div id="error"></div>
+    <script src="https://tesseract.projectnaptha.com/1.0.0/tesseract.min.js"></script>
     <script>
+        // Register service worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/service-worker.js')
+                .then(registration => {
+                    console.log('Service Worker registered with scope:', registration.scope);
+                })
+                .catch(error => {
+                    console.error('Service Worker registration failed:', error);
+                });
+        }
+
         const video = document.getElementById('video');
         const canvas = document.getElementById('canvas');
         const numbersList = document.getElementById('numbersList');
+        const loader = document.getElementById('loader');
+        const error = document.getElementById('error');
         const ctx = canvas.getContext('2d');
 
-        // Access the camera and start video stream
-        navigator.mediaDevices.getUserMedia({ video: true })
-            .then(stream => {
-                video.srcObject = stream;
-                video.onloadedmetadata = () => {
-                    video.play();
-                    scanText();
-                };
-            })
-            .catch(error => {
-                console.error('Unable to access the camera.', error);
-            });
+        // Check for camera support
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            // Access the camera and start video stream
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(stream => {
+                    video.srcObject = stream;
+                    video.onloadedmetadata = () => {
+                        video.play();
+                        scanText();
+                    };
+                })
+                .catch(error => {
+                    console.error('Unable to access the camera.', error);
+                    showError('Failed to access the camera. Please check your camera settings and try again.');
+                });
+        } else {
+            console.error('Camera not supported.');
+            showError('Camera not supported.');
+        }
 
         // Scan text from camera video
         function scanText() {
+            loader.style.display = 'block';
             ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
             const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            const Tesseract = Tesseract.create({
-                lang: 'eng'
-            });
             Tesseract.recognize(imageData)
                 .then(result => {
                     const detectedText = result.data.text;
                     const numbers = extractNumbers(detectedText);
                     displayNumbers(numbers);
-                    setTimeout(scanText, 1000); // Continuously scan text every 1 second
+                    loader.style.display = 'none';
+                    requestAnimationFrame(scanText); // Continuously scan text using requestAnimationFrame for better performance
                 })
                 .catch(error => {
                     console.error('Failed to recognize text.', error);
+                    showError('Failed to recognize text. Please try again.');
+                    loader.style.display = 'none';
                 });
         }
 
@@ -58,21 +90,25 @@
             const matches = text.match(regex);
             return matches ? matches.map(Number) : [];
         }
-
+        
         // Display detected numbers in a list
         function displayNumbers(numbers) {
             numbersList.innerHTML = '';
             if (numbers.length === 0) {
-                const listItem = document.createElement('li');
-                listItem.textContent = 'No numbers detected.';
-                numbersList.appendChild(listItem);
+                numbersList.innerHTML = '<li>No numbers detected</li>';
             } else {
                 numbers.forEach(number => {
-                    const listItem = document.createElement('li');
-                    listItem.textContent = number;
-                    numbersList.appendChild(listItem);
+                    const li = document.createElement('li');
+                    li.textContent = number;
+                    numbersList.appendChild(li);
                 });
             }
+        }
+
+        // Show error message
+        function showError(message) {
+            error.textContent = message;
+            error.style.display = 'block';
         }
     </script>
 </body>
