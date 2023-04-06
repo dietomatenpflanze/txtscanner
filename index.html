@@ -1,33 +1,30 @@
 <!DOCTYPE html>
 <html>
-
-<head>
-    <title>Text Detection App</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-
-<body>
-    <h1>Text Detection App</h1>
-    <div id="app-container">
-        <div id="video-container">
-            <video id="video" autoplay></video>
-            <canvas id="canvas"></canvas>
-        </div>
-        <div id="result-container">
-            <h2>Processed Image</h2>
-            <img id="processed-image" src="" alt="Processed Image">
-            <h2>Raw Result</h2>
-            <pre id="raw-result"></pre>
-            <h2>Table-like Result</h2>
-            <table id="table-result"></table>
-        </div>
-        <div id="feedback-container">
-            <p id="feedback-text"></p>
-        </div>
-        <button id="start-stop-btn">Start</button>
+  <head>
+    <meta charset="utf-8">
+    <title>Text Detection</title>
+      <link rel="stylesheet" href="style.css">
+    <style>
+      #canvas {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Text Detection</h1>
+    <video id="video"></video>
+    <canvas id="canvas"></canvas>
+    <img id="processed-image" width="640" height="480">
+    <div id="feedback-text"></div>
+    <button id="start-stop-btn">Start</button>
+    <div id="result-container">
+      <h2>Raw Result:</h2>
+      <pre id="raw-result"></pre>
+      <h2>Table Result:</h2>
+      <table id="table-result"></table>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/tesseract.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.11.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@2.2.2/dist/tesseract.min.js"></script>
     <script src="script.js"></script>
-</body>
-
+  </body>
 </html>
