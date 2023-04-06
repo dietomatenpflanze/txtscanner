@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Text Scanner</title>
+    <style>
+        video {
+            border: 1px solid #000;
+        }
+    </style>
+</head>
+<body>
+    <h1>Text Scanner</h1>
+    <video id="video" width="640" height="480" autoplay></video>
+    <canvas id="canvas" width="640" height="480"></canvas>
+    <h2>Detected Numbers:</h2>
+    <ul id="numbersList"></ul>
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const numbersList = document.getElementById('numbersList');
+        const ctx = canvas.getContext('2d');
+
+        // Access the camera and start video stream
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                video.srcObject = stream;
+                video.onloadedmetadata = () => {
+                    video.play();
+                    scanText();
+                };
+            })
+            .catch(error => {
+                console.error('Unable to access the camera.', error);
+            });
+
+        // Scan text from camera video
+        function scanText() {
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const Tesseract = Tesseract.create({
+                lang: 'eng'
+            });
+            Tesseract.recognize(imageData)
+                .then(result => {
+                    const detectedText = result.data.text;
+                    const numbers = extractNumbers(detectedText);
+                    displayNumbers(numbers);
+                    setTimeout(scanText, 1000); // Continuously scan text every 1 second
+                })
+                .catch(error => {
+                    console.error('Failed to recognize text.', error);
+                });
+        }
+
+        // Extract numbers from detected text
+        function extractNumbers(text) {
+            const regex = /\b\d+\b/g; // Regular expression to match numbers
+            const matches = text.match(regex);
+            return matches ? matches.map(Number) : [];
+        }
+
+        // Display detected numbers in a list
+        function displayNumbers(numbers) {
+            numbersList.innerHTML = '';
+            if (numbers.length === 0) {
+                const listItem = document.createElement('li');
+                listItem.textContent = 'No numbers detected.';
+                numbersList.appendChild(listItem);
+            } else {
+                numbers.forEach(number => {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = number;
+                    numbersList.appendChild(listItem);
+                });
+            }
+        }
+    </script>
+</body>
+</html>
