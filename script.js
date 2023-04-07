@@ -31,8 +31,12 @@ if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
 // Load Tesseract.js library
 Tesseract.initialize({
     lang: "eng",
-    workerPath: "https://cdn.jsdelivr.net/npm/tesseract.js@2.1.4/dist/worker.min.js",
-    corePath: "https://cdn.jsdelivr.net/npm/tesseract.js@2.1.4/dist/tesseract-core.wasm.js",
+    workerPath: 'https://unpkg.com/tesseract.js@v4.0.1/dist/worker.min.js',
+  langPath: 'https://tessdata.projectnaptha.com/4.0.0',
+  corePath: 'https://unpkg.com/tesseract.js-core@v4.0.1/tesseract-core.wasm.js',
+    
+    /*workerPath: "https://cdn.jsdelivr.net/npm/tesseract.js@2.1.4/dist/worker.min.js",
+    corePath: "https://cdn.jsdelivr.net/npm/tesseract.js@2.1.4/dist/tesseract-core.wasm.js",*/
 })
 .then(function () {
     isTesseractLoaded = true;
