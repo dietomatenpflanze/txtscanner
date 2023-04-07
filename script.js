@@ -38,9 +38,13 @@ document.addEventListener("DOMContentLoaded", function () {
     .then(function () {
         isTesseractLoaded = true;
         feedbackElement.textContent = "Tesseract.js loaded successfully.";
+        // Show success dialog
+        showDialog('Success', 'Tesseract.js library loaded successfully!');
     })
     .catch(function (error) {
         feedbackElement.textContent = "Failed to load Tesseract.js.";
+        // Show error dialog
+        showDialog('Error', 'Failed to load Tesseract.js library. Error: ' + error.message);
     });
 
     // Start button click event
@@ -66,6 +70,11 @@ document.addEventListener("DOMContentLoaded", function () {
         startButton.disabled = false;
         feedbackElement.textContent = "Text detection stopped.";
     });
+    
+    // Function to show dialog
+function showDialog(title, message) {
+    alert(title + ': ' + message);
+}
 
     // Function to detect text from camera
     function detectTextFromCamera() {
