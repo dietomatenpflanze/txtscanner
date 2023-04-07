@@ -32,7 +32,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // Load Tesseract.js library
     Tesseract.initialize({
         lang: "eng",
-      workerPath: "https://cdn.jsdelivr.net/npm/tesseract.js@2.1.4/dist/worker.min.js",
+        workerPath: "https://cdn.jsdelivr.net/npm/tesseract.js@2.1.4/dist/worker.min.js",
         corePath: "https://cdn.jsdelivr.net/npm/tesseract.js@2.1.4/dist/tesseract-core.wasm.js",
     })
     .then(function () {
@@ -77,7 +77,7 @@ document.addEventListener("DOMContentLoaded", function () {
             detectTextFromCamera();
         })
         .catch(function (error) {
-            feedbackElement.textContent = "Failed to detect text.";
+            feedbackElement.textContent = "Failed to detect text. Please try again.";
             stopButton.disabled = true;
             startButton.disabled = false;
         });
