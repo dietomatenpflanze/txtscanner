@@ -8,22 +8,28 @@
 </head>
 
 <body>
-    <div class="container">
-        <h1>OCR Web App</h1>
-        <div class="camera-container">
+    <header>
+        <h1>Text Detection App</h1>
+    </header>
+    <main>
+        <div class="container">
+            <h2>Camera Input</h2>
             <video id="cameraInput" autoplay></video>
             <canvas id="canvasOutput"></canvas>
-            <div class="result-container">
-                <h3>Detected Text:</h3>
-                <p id="result"></p>
-            </div>
         </div>
-        <div id="feedback" class="feedback-container"></div>
-        <div class="controls-container">
-            <button id="startButton" class="control-button">Start</button>
-            <button id="stopButton" class="control-button">Stop</button>
+        <div class="container">
+            <h2>Result</h2>
+            <div id="result" class="result-text"></div>
         </div>
-    </div>
+        <div class="container">
+            <h2>Feedback</h2>
+            <div id="feedback" class="feedback-text"></div>
+        </div>
+        <div class="buttons-container">
+            <button id="startButton" class="button" disabled>Start</button>
+            <button id="stopButton" class="button" disabled>Stop</button>
+        </div>
+    </main>
 
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-core"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs-converter"></script>
